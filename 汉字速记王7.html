@@ -1,0 +1,933 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汉字速记王 - 常见别字限时挑战</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .game-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+        
+        .game-info-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #ecf0f1;
+            padding: 15px 30px;
+            border-bottom: 1px solid #bdc3c7;
+        }
+        
+        .info-item {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        #timer {
+            color: #e74c3c;
+        }
+        
+        #streak {
+            color: #f39c12;
+        }
+        
+        #score {
+            color: #27ae60;
+        }
+        
+        .game-screen {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        /* 开始屏幕 */
+        #start-screen h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        #start-screen p {
+            font-size: 1.3rem;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        
+        /* 游戏主屏幕 */
+        #game-screen {
+            display: none;
+        }
+        
+        .word-display {
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 40px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #word-text {
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            /* 固定背景为浅灰色，字体为深黑色 */
+            background-color: #f5f5f5;
+            color: #333333;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .decision-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .decision-btn {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .decision-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .decision-btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        #correct-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        
+        #wrong-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        
+        .feedback {
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .correct-feedback {
+            color: #27ae60;
+            background-color: rgba(39, 174, 96, 0.1);
+        }
+        
+        .incorrect-feedback {
+            color: #e74c3c;
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        /* 结果屏幕 */
+        #result-screen {
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .stat-box {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            min-width: 180px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+        }
+        
+        .accuracy-value {
+            color: #27ae60;
+        }
+        
+        .speed-value {
+            color: #3498db;
+        }
+        
+        .streak-value {
+            color: #f39c12;
+        }
+        
+        .result-details {
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .result-details h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .mistakes-list {
+            list-style-type: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .mistakes-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1rem;
+        }
+        
+        .wrong-part {
+            color: #e74c3c;
+            text-decoration: line-through;
+        }
+        
+        .correct-part {
+            color: #27ae60;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .action-btn {
+            padding: 18px 35px;
+            font-size: 1.3rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        #restart-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        #review-btn {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+        }
+        
+        .instructions {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            text-align: center;
+            max-width: 900px;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .instructions p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .decision-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .decision-btn {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .word-display {
+                font-size: 3rem;
+            }
+            
+            .result-stats {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .stat-box {
+                width: 80%;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .game-screen {
+                padding: 20px;
+            }
+            
+            .word-display {
+                font-size: 2.5rem;
+                margin: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="header">
+            <h1>汉字速记王</h1>
+            <div class="subtitle">限时挑战 - 快速判断常见别字的正确性</div>
+        </div>
+        
+        <div class="game-info-bar">
+            <div class="info-item">时间: <span id="timer">60</span>秒</div>
+            <div class="info-item">连击: <span id="streak">0</span></div>
+            <div class="info-item">得分: <span id="score">0</span></div>
+        </div>
+        
+        <!-- 开始屏幕 -->
+        <div class="game-screen" id="start-screen">
+            <h2>汉字速记挑战</h2>
+            <p>在60秒内，快速判断显示的词语是否正确。<br>选择"正确"或"错误"，尽可能获得高分！<br>连续答对会有连击加分哦！</p>
+            
+            <div class="action-buttons">
+                <button class="action-btn" id="start-btn" style="font-size: 1.5rem; padding: 20px 50px;">
+                    开始挑战
+                </button>
+            </div>
+        </div>
+        
+        <!-- 游戏主屏幕 -->
+        <div class="game-screen" id="game-screen">
+            <div class="word-display">
+                <div id="word-text">准备开始...</div>
+            </div>
+            
+            <div class="decision-buttons">
+                <button class="decision-btn" id="correct-btn">
+                    <div class="btn-icon">?</div>
+                    <div>正确</div>
+                </button>
+                
+                <button class="decision-btn" id="wrong-btn">
+                    <div class="btn-icon">?</div>
+                    <div>错误</div>
+                </button>
+            </div>
+            
+            <div class="feedback" id="feedback">
+                <!-- 反馈信息将通过JavaScript动态生成 -->
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+        
+        <!-- 结果屏幕 -->
+        <div class="game-screen" id="result-screen">
+            <h2 class="result-title">挑战结束！</h2>
+            
+            <div class="result-stats">
+                <div class="stat-box">
+                    <div class="stat-value accuracy-value" id="final-accuracy">0%</div>
+                    <div class="stat-label">正确率</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-value" id="final-score">0</div>
+                    <div class="stat-label">最终得分</div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-value streak-value" id="final-streak">0</div>
+                    <div class="stat-label">最高连击</div>
+                </div>
+            </div>
+            
+            <div class="result-details">
+                <h3>错题回顾</h3>
+                <ul class="mistakes-list" id="mistakes-list">
+                    <!-- 错题列表将通过JavaScript动态生成 -->
+                </ul>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" id="restart-btn">再玩一次</button>
+                <button class="action-btn" id="review-btn">复习错题</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>游戏规则</h3>
+        <p>1. 游戏限时60秒，你需要快速判断屏幕上显示的词语是否正确</p>
+        <p>2. 如果词语是正确的（没有错别字），点击"正确"按钮；如果有错别字，点击"错误"按钮</p>
+        <p>3. 每答对一题得10分，连续答对会有连击加分（每连击一次额外加2分）</p>
+        <p>4. 答错不会扣分，但会中断连击记录</p>
+        <p>5. 游戏结束后可以查看错题并进行复习</p>
+    </div>
+
+    <script>
+        // 完整的100个常见别字题库（基于您提供的文件）
+        const wordPairs = [
+            // 第1-10组
+            { wrong: "按装", correct: "安装", isWrong: true },
+            { wrong: "甘败下风", correct: "甘拜下风", isWrong: true },
+            { wrong: "自抱自弃", correct: "自暴自弃", isWrong: true },
+            { wrong: "针贬", correct: "针砭", isWrong: true },
+            { wrong: "泊来品", correct: "舶来品", isWrong: true },
+            { wrong: "脉膊", correct: "脉搏", isWrong: true },
+            { wrong: "松驰", correct: "松弛", isWrong: true },
+            { wrong: "一愁莫展", correct: "一筹莫展", isWrong: true },
+            { wrong: "穿流不息", correct: "川流不息", isWrong: true },
+            { wrong: "精萃", correct: "精粹", isWrong: true },
+            
+            // 第11-20组
+            { wrong: "重迭", correct: "重叠", isWrong: true },
+            { wrong: "渡假村", correct: "度假村", isWrong: true },
+            { wrong: "防碍", correct: "妨碍", isWrong: true },
+            { wrong: "幅射", correct: "辐射", isWrong: true },
+            { wrong: "一幅对联", correct: "一副对联", isWrong: true },
+            { wrong: "天翻地复", correct: "天翻地覆", isWrong: true },
+            { wrong: "言简意骇", correct: "言简意赅", isWrong: true },
+            { wrong: "气慨", correct: "气概", isWrong: true },
+            { wrong: "一股作气", correct: "一鼓作气", isWrong: true },
+            { wrong: "悬梁刺骨", correct: "悬梁刺股", isWrong: true },
+            
+            // 第21-30组
+            { wrong: "粗旷", correct: "粗犷", isWrong: true },
+            { wrong: "食不裹腹", correct: "食不果腹", isWrong: true },
+            { wrong: "震憾", correct: "震撼", isWrong: true },
+            { wrong: "凑和", correct: "凑合", isWrong: true },
+            { wrong: "侯车室", correct: "候车室", isWrong: true },
+            { wrong: "迫不急待", correct: "迫不及待", isWrong: true },
+            { wrong: "既使", correct: "即使", isWrong: true },
+            { wrong: "一如继往", correct: "一如既往", isWrong: true },
+            { wrong: "草管人命", correct: "草菅人命", isWrong: true },
+            { wrong: "娇揉造作", correct: "矫揉造作", isWrong: true },
+            
+            // 第31-40组
+            { wrong: "挖墙角", correct: "挖墙脚", isWrong: true },
+            { wrong: "一诺千斤", correct: "一诺千金", isWrong: true },
+            { wrong: "不径而走", correct: "不胫而走", isWrong: true },
+            { wrong: "峻工", correct: "竣工", isWrong: true },
+            { wrong: "不落巢臼", correct: "不落窠臼", isWrong: true },
+            { wrong: "烩炙人口", correct: "脍炙人口", isWrong: true },
+            { wrong: "打腊", correct: "打蜡", isWrong: true },
+            { wrong: "死皮癞脸", correct: "死皮赖脸", isWrong: true },
+            { wrong: "兰天白云", correct: "蓝天白云", isWrong: true },
+            { wrong: "鼎立相助", correct: "鼎力相助", isWrong: true },
+            
+            // 第41-50组
+            { wrong: "再接再励", correct: "再接再厉", isWrong: true },
+            { wrong: "老俩口", correct: "老两口", isWrong: true },
+            { wrong: "黄梁美梦", correct: "黄粱美梦", isWrong: true },
+            { wrong: "了望", correct: "瞭望", isWrong: true },
+            { wrong: "水笼头", correct: "水龙头", isWrong: true },
+            { wrong: "杀戳", correct: "杀戮", isWrong: true },
+            { wrong: "痉孪", correct: "痉挛", isWrong: true },
+            { wrong: "美仑美奂", correct: "美轮美奂", isWrong: true },
+            { wrong: "罗唆", correct: "啰嗦", isWrong: true },
+            { wrong: "蛛丝蚂迹", correct: "蛛丝马迹", isWrong: true },
+            
+            // 第51-60组
+            { wrong: "萎糜不振", correct: "萎靡不振", isWrong: true },
+            { wrong: "沉缅", correct: "沉湎", isWrong: true },
+            { wrong: "名信片", correct: "明信片", isWrong: true },
+            { wrong: "默守成规", correct: "墨守成规", isWrong: true },
+            { wrong: "大姆指", correct: "大拇指", isWrong: true },
+            { wrong: "沤心沥血", correct: "呕心沥血", isWrong: true },
+            { wrong: "凭添", correct: "平添", isWrong: true },
+            { wrong: "出奇不意", correct: "出其不意", isWrong: true },
+            { wrong: "修茸", correct: "修葺", isWrong: true },
+            { wrong: "亲睐", correct: "青睐", isWrong: true },
+            
+            // 第61-70组
+            { wrong: "磬竹难书", correct: "罄竹难书", isWrong: true },
+            { wrong: "入场卷", correct: "入场券", isWrong: true },
+            { wrong: "声名雀起", correct: "声名鹊起", isWrong: true },
+            { wrong: "发韧", correct: "发轫", isWrong: true },
+            { wrong: "搔痒病", correct: "瘙痒病", isWrong: true },
+            { wrong: "欣尝", correct: "欣赏", isWrong: true },
+            { wrong: "谈笑风声", correct: "谈笑风生", isWrong: true },
+            { wrong: "人情事故", correct: "人情世故", isWrong: true },
+            { wrong: "有持无恐", correct: "有恃无恐", isWrong: true },
+            { wrong: "额首称庆", correct: "额手称庆", isWrong: true },
+            
+            // 第71-80组
+            { wrong: "追朔", correct: "追溯", isWrong: true },
+            { wrong: "鬼鬼崇崇", correct: "鬼鬼祟祟", isWrong: true },
+            { wrong: "金榜提名", correct: "金榜题名", isWrong: true },
+            { wrong: "走头无路", correct: "走投无路", isWrong: true },
+            { wrong: "趋之若骛", correct: "趋之若鹜", isWrong: true },
+            { wrong: "迁徒", correct: "迁徙", isWrong: true },
+            { wrong: "洁白无暇", correct: "洁白无瑕", isWrong: true },
+            { wrong: "九宵", correct: "九霄", isWrong: true },
+            { wrong: "渲泄", correct: "宣泄", isWrong: true },
+            { wrong: "寒喧", correct: "寒暄", isWrong: true },
+            
+            // 第81-90组
+            { wrong: "弦律", correct: "旋律", isWrong: true },
+            { wrong: "膺品", correct: "赝品", isWrong: true },
+            { wrong: "不能自己", correct: "不能自已", isWrong: true },
+            { wrong: "尤如猛虎下山", correct: "犹如猛虎下山", isWrong: true },
+            { wrong: "竭泽而鱼", correct: "竭泽而渔", isWrong: true },
+            { wrong: "滥芋充数", correct: "滥竽充数", isWrong: true },
+            { wrong: "世外桃园", correct: "世外桃源", isWrong: true },
+            { wrong: "脏款", correct: "赃款", isWrong: true },
+            { wrong: "醮水", correct: "蘸水", isWrong: true },
+            { wrong: "蜇伏", correct: "蛰伏", isWrong: true },
+            
+            // 第91-100组
+            { wrong: "装祯", correct: "装帧", isWrong: true },
+            { wrong: "饮鸠止渴", correct: "饮鸩止渴", isWrong: true },
+            { wrong: "坐阵", correct: "坐镇", isWrong: true },
+            { wrong: "旁证博引", correct: "旁征博引", isWrong: true },
+            { wrong: "灸手可热", correct: "炙手可热", isWrong: true },
+            { wrong: "九洲", correct: "九州", isWrong: true },
+            { wrong: "床第之私", correct: "床笫之私", isWrong: true },
+            { wrong: "姿意妄为", correct: "恣意妄为", isWrong: true },
+            { wrong: "编篡", correct: "编纂", isWrong: true },
+            { wrong: "做月子", correct: "坐月子", isWrong: true }
+        ];
+
+        // 为每个词语对创建两个版本：错误版本和正确版本
+        const questionPool = [];
+        wordPairs.forEach(pair => {
+            // 添加错误版本（显示错误词）
+            questionPool.push({
+                displayed: pair.wrong,
+                correct: pair.correct,
+                isDisplayedWrong: true,
+                explanation: `错误写法，正确应为：${pair.correct}`
+            });
+            
+            // 添加正确版本（显示正确词）- 只添加少量，确保错误项占60%以上
+            // 我们只添加40%的正确版本
+            if (Math.random() < 0.4) {
+                questionPool.push({
+                    displayed: pair.correct,
+                    correct: pair.correct,
+                    isDisplayedWrong: false,
+                    explanation: `正确写法`
+                });
+            }
+        });
+        
+        console.log(`题库已创建：共${questionPool.length}个题目，其中错误项占比：${((questionPool.filter(q => q.isDisplayedWrong).length / questionPool.length) * 100).toFixed(1)}%`);
+        
+        // 游戏状态
+        let gameActive = false;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let timeLeft = 60;
+        let correctAnswers = 0;
+        let totalAnswers = 0;
+        let mistakes = [];
+        let timerInterval;
+        let currentQuestion = {};
+        
+        // DOM元素
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        
+        const timerElement = document.getElementById('timer');
+        const streakElement = document.getElementById('streak');
+        const scoreElement = document.getElementById('score');
+        const wordTextElement = document.getElementById('word-text');
+        const feedbackElement = document.getElementById('feedback');
+        const progressBar = document.getElementById('progress-bar');
+        
+        const correctBtn = document.getElementById('correct-btn');
+        const wrongBtn = document.getElementById('wrong-btn');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const reviewBtn = document.getElementById('review-btn');
+        
+        const finalAccuracyElement = document.getElementById('final-accuracy');
+        const finalScoreElement = document.getElementById('final-score');
+        const finalStreakElement = document.getElementById('final-streak');
+        const mistakesList = document.getElementById('mistakes-list');
+        
+        // 初始化游戏
+        function initGame() {
+            // 重置游戏状态
+            gameActive = true;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            timeLeft = 60;
+            correctAnswers = 0;
+            totalAnswers = 0;
+            mistakes = [];
+            
+            // 更新UI
+            updateScore();
+            updateTimer();
+            
+            // 显示游戏屏幕
+            startScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            resultScreen.style.display = 'none';
+            
+            // 加载第一个词语
+            loadNextWord();
+            
+            // 开始计时器
+            startTimer();
+        }
+        
+        // 加载下一个词语
+        function loadNextWord() {
+            // 随机选择一个题目
+            const randomIndex = Math.floor(Math.random() * questionPool.length);
+            currentQuestion = {...questionPool[randomIndex]};
+            
+            // 显示词语
+            wordTextElement.textContent = currentQuestion.displayed;
+            
+            // 重置反馈
+            feedbackElement.style.display = 'none';
+            
+            // 更新进度条
+            const progressPercentage = (totalAnswers / 50) * 100; // 假设最多50题
+            progressBar.style.width = Math.min(progressPercentage, 100) + '%';
+        }
+        
+        // 开始计时器
+        function startTimer() {
+            clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+        
+        // 更新计时器显示
+        function updateTimer() {
+            timerElement.textContent = timeLeft;
+            
+            // 时间紧迫时改变颜色
+            if (timeLeft <= 10) {
+                timerElement.style.color = '#e74c3c';
+                timerElement.style.animation = 'pulse 1s infinite';
+            } else {
+                timerElement.style.color = '#2c3e50';
+                timerElement.style.animation = 'none';
+            }
+        }
+        
+        // 更新分数显示
+        function updateScore() {
+            scoreElement.textContent = score;
+            streakElement.textContent = streak;
+        }
+        
+        // 处理答案选择
+        function handleAnswer(isCorrectChoice) {
+            if (!gameActive) return;
+            
+            totalAnswers++;
+            
+            // 判断用户的选择是否正确
+            // 如果显示的是错误词，用户应选择"错误"(false)
+            // 如果显示的是正确词，用户应选择"正确"(true)
+            const isCorrect = (isCorrectChoice && !currentQuestion.isDisplayedWrong) || 
+                             (!isCorrectChoice && currentQuestion.isDisplayedWrong);
+            
+            // 显示反馈
+            feedbackElement.style.display = 'block';
+            
+            if (isCorrect) {
+                // 回答正确
+                feedbackElement.textContent = '回答正确！';
+                if (currentQuestion.isDisplayedWrong) {
+                    feedbackElement.textContent += ` 正确写法是：${currentQuestion.correct}`;
+                }
+                feedbackElement.className = 'feedback correct-feedback';
+                
+                // 更新分数和连击
+                correctAnswers++;
+                streak++;
+                maxStreak = Math.max(maxStreak, streak);
+                
+                // 基础分10分 + 连击奖励
+                score += 10 + (streak > 1 ? (streak - 1) * 2 : 0);
+            } else {
+                // 回答错误
+                feedbackElement.textContent = `回答错误！`;
+                if (currentQuestion.isDisplayedWrong) {
+                    feedbackElement.textContent += ` 正确写法是：${currentQuestion.correct}`;
+                } else {
+                    feedbackElement.textContent += ` 这个词是正确的`;
+                }
+                feedbackElement.className = 'feedback incorrect-feedback';
+                
+                // 中断连击
+                streak = 0;
+                
+                // 记录错题
+                mistakes.push({
+                    displayed: currentQuestion.displayed,
+                    correct: currentQuestion.correct,
+                    isDisplayedWrong: currentQuestion.isDisplayedWrong,
+                    explanation: currentQuestion.explanation,
+                    userChoice: isCorrectChoice ? '正确' : '错误'
+                });
+            }
+            
+            // 更新UI
+            updateScore();
+            
+            // 1秒后加载下一题
+            setTimeout(() => {
+                if (gameActive) {
+                    loadNextWord();
+                }
+            }, 1000);
+        }
+        
+        // 结束游戏
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            // 计算正确率
+            const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+            
+            // 更新结果屏幕
+            finalAccuracyElement.textContent = accuracy + '%';
+            finalScoreElement.textContent = score;
+            finalStreakElement.textContent = maxStreak;
+            
+            // 显示错题
+            displayMistakes();
+            
+            // 切换到结果屏幕
+            gameScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+        }
+        
+        // 显示错题列表
+        function displayMistakes() {
+            mistakesList.innerHTML = '';
+            
+            if (mistakes.length === 0) {
+                mistakesList.innerHTML = '<li>太棒了！没有错题！</li>';
+                return;
+            }
+            
+            mistakes.forEach(mistake => {
+                const listItem = document.createElement('li');
+                
+                if (mistake.isDisplayedWrong) {
+                    // 显示的是错别字
+                    listItem.innerHTML = `
+                        显示：<span class="wrong-part">${mistake.displayed}</span> 
+                        → 正确写法：<span class="correct-part">${mistake.correct}</span>
+                        (你选择了：${mistake.userChoice})
+                    `;
+                } else {
+                    // 显示的是正确词语
+                    listItem.innerHTML = `
+                        显示：<span class="correct-part">${mistake.displayed}</span>
+                        (这是正确的，但你选择了：${mistake.userChoice})
+                    `;
+                }
+                
+                mistakesList.appendChild(listItem);
+            });
+        }
+        
+        // 复习错题
+        function reviewMistakes() {
+            if (mistakes.length === 0) {
+                alert('没有错题需要复习！');
+                return;
+            }
+            
+            // 创建复习模式的问题列表
+            const reviewQuestions = mistakes.map(mistake => {
+                return {
+                    displayed: mistake.displayed,
+                    correct: mistake.correct,
+                    isDisplayedWrong: mistake.isDisplayedWrong,
+                    explanation: mistake.explanation
+                };
+            });
+            
+            // 这里可以扩展为专门的复习模式
+            alert(`你有 ${mistakes.length} 个错题需要复习。\n点击"再玩一次"可以重新挑战，重点注意这些错题！`);
+        }
+        
+        // 事件监听
+        startBtn.addEventListener('click', initGame);
+        restartBtn.addEventListener('click', initGame);
+        reviewBtn.addEventListener('click', reviewMistakes);
+        
+        correctBtn.addEventListener('click', () => handleAnswer(true));
+        wrongBtn.addEventListener('click', () => handleAnswer(false));
+        
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === '1') {
+                // 左箭头或A键或数字1选择"正确"
+                handleAnswer(true);
+                correctBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    correctBtn.style.transform = '';
+                }, 200);
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === '2') {
+                // 右箭头或D键或数字2选择"错误"
+                handleAnswer(false);
+                wrongBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    wrongBtn.style.transform = '';
+                }, 200);
+            }
+        });
+        
+        // 初始化
+        window.onload = function() {
+            // 显示开始屏幕
+            startScreen.style.display = 'block';
+            gameScreen.style.display = 'none';
+            resultScreen.style.display = 'none';
+            
+            // 显示题库统计
+            const wrongCount = questionPool.filter(q => q.isDisplayedWrong).length;
+            const totalCount = questionPool.length;
+            const wrongPercentage = ((wrongCount / totalCount) * 100).toFixed(1);
+            console.log(`题库已加载：共${totalCount}个题目，其中错误项${wrongCount}个，占比${wrongPercentage}%`);
+        };
+    </script>
+</body>
+</html>
